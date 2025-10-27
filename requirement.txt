@@ -1,0 +1,8 @@
+- i want this to be django framework
+- modify from using goggle collabs to be local development
+- modify uploading output / input from google drive to local storate
+- read the system and modify to optimize
+- create frontend web to run this flow including uploading file
+- no need authentication and no need to use database
+- create file or modify README.md to generate how to use this apps
+- add how to do instalation and run this app

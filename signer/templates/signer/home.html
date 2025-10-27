@@ -1,0 +1,113 @@
+{% load static django_browser_reload %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EdDSA Document Signer</title>
+    <link rel="stylesheet" href="{% static 'signer/css/styles.css' %}">
+</head>
+<body>
+<main class="container">
+    <header class="hero">
+        <div class="hero-text">
+            <h1>EdDSA Document Signer</h1>
+            <p class="lead">
+                Generate and verify Ed25519 signatures for Microsoft Word documents entirely on your machine.
+                Upload a file to create a signature bundle or confirm the authenticity of an existing document.
+            </p>
+            <ul class="hero-steps">
+                <li><span class="badge">1</span> Upload a DOCX file to sign or verify.</li>
+                <li><span class="badge">2</span> Download the generated signature bundle or provide existing artifacts.</li>
+                <li><span class="badge">3</span> Share only the public key; keep private keys secure.</li>
+            </ul>
+        </div>
+        <div class="hero-meta">
+            <p class="meta-label">EdDSA Digest Format</p>
+            <p class="meta-value">SHA-256 over `word/document.xml`</p>
+            <p class="meta-note">Digest is displayed and saved in hexadecimal for quick comparison.</p>
+        </div>
+    </header>
+
+    <section class="cards">
+        <article class="card">
+            <h2>Sign Document</h2>
+            <p class="card-intro">Upload the source DOCX to mint a fresh signature, public key, and digest summary.</p>
+            <form method="post" enctype="multipart/form-data" class="stacked-form">
+                {% csrf_token %}
+                {{ sign_form.as_p }}
+                <button type="submit" class="primary" name="sign-submit">Generate Signature</button>
+            </form>
+            {% if sign_error %}
+                <div class="alert danger">
+                    <strong>Unable to sign.</strong> {{ sign_error }}
+                </div>
+            {% endif %}
+            {% if sign_result %}
+                <div class="result-block">
+                    <div class="status success">
+                        <span class="status-label">Authentic Signature Bundle Created</span>
+                        <p>Digest (EdDSA): <code>{{ sign_result.digest_hex }}</code></p>
+                    </div>
+                    <div class="download-grid">
+                        <a class="download" href="{{ media_links.document }}" download>Document Copy</a>
+                        <a class="download" href="{{ media_links.signature }}" download>Signature (.sig)</a>
+                        <a class="download" href="{{ media_links.public_key }}" download>Public Key (.pem)</a>
+                        <a class="download" href="{{ media_links.digest }}" download>Digest (hex)</a>
+                    </div>
+                    <p class="helper-text">
+                        Keep the signature and public key together. Share only the public key with reviewers who will verify the document.
+                    </p>
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="card">
+            <h2>Verify Signature</h2>
+            <p class="card-intro">Provide the document, signature, and public key from a trusted source to confirm integrity.</p>
+            <form method="post" enctype="multipart/form-data" class="stacked-form">
+                {% csrf_token %}
+                {{ verify_form.as_p }}
+                <button type="submit" class="secondary" name="verify-submit">Run EdDSA Check</button>
+            </form>
+            <div class="card-notes">
+                <h3>What you need</h3>
+                <ul>
+                    <li>The original DOCX file to inspect.</li>
+                    <li>The `.sig` signature file created when the document was signed.</li>
+                    <li>The public key `.pem` that matches that signature.</li>
+                </ul>
+            </div>
+            {% if verify_error %}
+                <div class="alert danger">
+                    <strong>Verification failed.</strong> {{ verify_error }}
+                </div>
+            {% endif %}
+            {% if verify_result and verify_report %}
+                <div class="result-block">
+                    <div class="status {% if verify_report.is_valid %}success{% else %}warning{% endif %}">
+                        <span class="status-label">
+                            {% if verify_report.is_valid %}Signature Valid{% else %}Signature Invalid{% endif %}
+                        </span>
+                        <p>EdDSA Check: {{ verify_result }}</p>
+                    </div>
+                    <p class="digest-note">
+                        Digest recomputed from `word/document.xml`: <code>{{ verify_report.digest_hex }}</code>
+                    </p>
+                    {% if verify_report.is_valid %}
+                        <p class="helper-text">
+                            The provided signature matches the document exactly. Record the digest above if you need an audit trail.
+                        </p>
+                    {% else %}
+                        <div class="alert subtle">
+                            <strong>Next steps:</strong> Confirm you uploaded the original DOCX, signature, and public key. If they
+                            are correct, assume the file has been modified since signing.
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </article>
+    </section>
+</main>
+{% django_browser_reload_script %}
+</body>
+</html>
