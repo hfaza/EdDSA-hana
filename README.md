@@ -5,7 +5,7 @@ Local Django application for exploring Ed25519 (EdDSA) signing and verification 
 ## Prerequisites
 
 - Python 3.11 or newer
-- Recommended: virtual environment (`python3 -m venv .venv && source .venv/bin/activate`)
+- Recommended: virtual environment (`python3 -m venv venv && source venv/bin/activate`)
 
 ## Installation
 

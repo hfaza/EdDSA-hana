@@ -48,6 +48,24 @@
                         <span class="status-label">Authentic Signature Bundle Created</span>
                         <p>Digest (EdDSA): <code>{{ sign_result.digest_hex }}</code></p>
                     </div>
+                    <div class="doc-preview">
+                        <h3>Document Preview</h3>
+                        {% if media_links.preview %}
+                            <iframe
+                                class="doc-preview-frame"
+                                src="{{ media_links.preview }}"
+                                title="Signed document preview"
+                                loading="lazy"
+                            ></iframe>
+                            <p class="preview-note">
+                                Having trouble? <a href="{{ media_links.preview }}" target="_blank" rel="noopener">Open the preview in a new tab</a>.
+                            </p>
+                        {% elif sign_result.preview_error %}
+                            <p class="preview-note">{{ sign_result.preview_error }}</p>
+                        {% else %}
+                            <p class="preview-note">Preview unavailable.</p>
+                        {% endif %}
+                    </div>
                     <div class="download-grid">
                         <a class="download" href="{{ media_links.document }}" download>Document Copy</a>
                         <a class="download" href="{{ media_links.signature }}" download>Signature (.sig)</a>

@@ -76,6 +76,8 @@ def home(request):
             "public_key": _relative_media_url(sign_result.public_key_path),
             "digest": _relative_media_url(sign_result.digest_path),
         }
+        if sign_result.preview_path:
+            media_links["preview"] = _relative_media_url(sign_result.preview_path)
 
     context = {
         "sign_form": sign_form,
