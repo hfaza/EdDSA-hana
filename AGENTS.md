@@ -1,3 +1,14 @@
+# Agent Change Log
+
+## 2023-10-27: Gemini
+
+- **Removed Document Preview Feature:**
+    - Deleted the `_generate_docx_preview` and related HTML rendering functions from `signer/utils.py`.
+    - Removed the associated preview logic and context variables from the `home` view in `signer/views.py`.
+    - Deleted the document preview section from the `signer/templates/signer/home.html` template.
+- **Removed .DS_Store from git:**
+    - Added `.DS_Store` to `.gitignore` to prevent Mac-specific files from being committed.
+
 # Repository Guidelines
 
 ## Project Structure & Module Organization
