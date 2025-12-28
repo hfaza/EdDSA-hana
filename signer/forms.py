@@ -15,7 +15,7 @@ class DocumentVerifyForm(forms.Form):
     )
     signature = forms.FileField(
         label="Signature file",
-        help_text="Provide the .sig file generated during signing.",
+        help_text="Provide the .png QR code signature file.",
     )
     public_key = forms.FileField(
         label="Public key",

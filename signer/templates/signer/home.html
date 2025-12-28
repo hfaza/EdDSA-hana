@@ -51,9 +51,12 @@
 
                     <div class="download-grid">
                         <a class="download" href="{{ media_links.document }}" download>Document Copy</a>
-                        <a class="download" href="{{ media_links.signature }}" download>Signature (.sig)</a>
+                        <a class="download" href="{{ media_links.signature_qr }}" download>Signature QR (.png)</a>
                         <a class="download" href="{{ media_links.public_key }}" download>Public Key (.pem)</a>
                         <a class="download" href="{{ media_links.digest }}" download>Digest (hex)</a>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <img src="{{ media_links.signature_qr }}" alt="Signature QR Code" style="max-width: 200px; border: 1px solid #ccc;">
                     </div>
                     <p class="helper-text">
                         Keep the signature and public key together. Share only the public key with reviewers who will verify the document.
@@ -74,7 +77,7 @@
                 <h3>What you need</h3>
                 <ul>
                     <li>The original DOCX file to inspect.</li>
-                    <li>The `.sig` signature file created when the document was signed.</li>
+                    <li>The `.png` QR code signature file.</li>
                     <li>The public key `.pem` that matches that signature.</li>
                 </ul>
             </div>

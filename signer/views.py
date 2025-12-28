@@ -72,7 +72,7 @@ def home(request):
     if sign_result:
         media_links = {
             "document": _relative_media_url(sign_result.document_path),
-            "signature": _relative_media_url(sign_result.signature_path),
+            "signature_qr": _relative_media_url(sign_result.qr_path),
             "public_key": _relative_media_url(sign_result.public_key_path),
             "digest": _relative_media_url(sign_result.digest_path),
         }

@@ -6,3 +6,7 @@ media/
 staticfiles/
 *.log
 venv/
+
+.DS_Store
+*.pem
+signed_discount_qr.png
