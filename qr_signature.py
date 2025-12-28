@@ -4,15 +4,14 @@ from datetime import datetime, timedelta
 import uuid
 
 import qrcode
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.backends import default_backend
 
 
 def generate_keys(private_key_path="private_key.pem", public_key_path="public_key.pem"):
     """
-    Generates an RSA private and public key pair and saves them to PEM files.
+    Generates an Ed25519 private and public key pair and saves them to PEM files.
     """
     if os.path.exists(private_key_path) and os.path.exists(public_key_path):
         print("Keys already exist. Skipping key generation.")
@@ -29,11 +28,7 @@ def generate_keys(private_key_path="private_key.pem", public_key_path="public_ke
             )
         return private_key, public_key
 
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-        backend=default_backend()
-    )
+    private_key = ed25519.Ed25519PrivateKey.generate()
     public_key = private_key.public_key()
 
     # Save private key
@@ -57,18 +52,18 @@ def generate_keys(private_key_path="private_key.pem", public_key_path="public_ke
 
 def generate_qr_code_signature(
     data: dict,
-    private_key: rsa.RSAPrivateKey,
+    private_key: ed25519.Ed25519PrivateKey,
     qr_code_filename: str = "qrcode.png",
     expiration_days: int = 7
 ):
     """
-    Generates a QR code with a digital signature for the given data.
+    Generates a QR code with a digital signature for the given data using Ed25519.
 
     Args:
         data (dict): The data to be signed and encoded in the QR code.
                      Expected to contain 'customer_id', 'discount_value',
                      'discount_type'.
-        private_key (rsa.RSAPrivateKey): The RSA private key for signing.
+        private_key (ed25519.Ed25519PrivateKey): The Ed25519 private key for signing.
         qr_code_filename (str): The filename for the generated QR code image.
         expiration_days (int): Number of days until the QR code expires.
 
@@ -90,14 +85,7 @@ def generate_qr_code_signature(
     payload_bytes = payload_str.encode("utf-8")
 
     # Sign the payload
-    signature = private_key.sign(
-        payload_bytes,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        hashes.SHA256()
-    )
+    signature = private_key.sign(payload_bytes)
 
     # Combine payload and signature for QR code
     qr_data = {
@@ -122,13 +110,13 @@ def generate_qr_code_signature(
     return qr_code_filename
 
 
-def verify_qr_code_signature(qr_data_str: str, public_key: rsa.RSAPublicKey) -> bool:
+def verify_qr_code_signature(qr_data_str: str, public_key: ed25519.Ed25519PublicKey) -> bool:
     """
-    Verifies the digital signature embedded in QR code data.
+    Verifies the digital signature embedded in QR code data using Ed25519.
 
     Args:
         qr_data_str (str): The JSON string read from the QR code.
-        public_key (rsa.RSAPublicKey): The RSA public key for verification.
+        public_key (ed25519.Ed25519PublicKey): The Ed25519 public key for verification.
 
     Returns:
         bool: True if the signature is valid and data has not expired, False otherwise.
@@ -143,15 +131,7 @@ def verify_qr_code_signature(qr_data_str: str, public_key: rsa.RSAPublicKey) -> 
         payload_bytes = payload_str.encode("utf-8")
 
         # Verify the signature
-        public_key.verify(
-            signature,
-            payload_bytes,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
+        public_key.verify(signature, payload_bytes)
         
         # Check expiration date
         expiration_date_str = payload.get("expiration_date")
@@ -214,14 +194,7 @@ if __name__ == "__main__":
     example_payload_str = json.dumps(example_payload, sort_keys=True)
     example_payload_bytes = example_payload_str.encode("utf-8")
 
-    example_signature = private_key.sign(
-        example_payload_bytes,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        hashes.SHA256()
-    )
+    example_signature = private_key.sign(example_payload_bytes)
 
     example_qr_data = {
         "payload": example_payload,
@@ -258,14 +231,7 @@ if __name__ == "__main__":
     }
     expired_payload_str = json.dumps(expired_payload, sort_keys=True)
     expired_payload_bytes = expired_payload_str.encode("utf-8")
-    expired_signature = private_key.sign(
-        expired_payload_bytes,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        hashes.SHA256()
-    )
+    expired_signature = private_key.sign(expired_payload_bytes)
     expired_qr_data = {
         "payload": expired_payload,
         "signature": expired_signature.hex()
